@@ -1,29 +1,41 @@
 'use strict'
 
-import fastify from 'fastify'
-import GQL from 'fastify-gql'
-import {resolvers} from "resolvers"
-import schema from "schema"
-import data from "data"
+const Fastify = require('fastify')
+const GQL = require('fastify-gql')
+const schema = require("./schema.graphql")
+const data = require("./data")
+const findContractComponent = require("./helper")
 
-const server = fastify()
+const server = Fastify()
 
-export const resolvers = {
+const resolvers = {
     Query: {
       readContract: async (_, { contractId }) => {
         const element = data[`${contractId}`];
         if (!element) return null;
-        return element;
+        return JSON.stringify(element);
       },
       readContractComponent: async (_, { contractComponentId }) => {
-      },
+        const element = findContractComponent(data,contractComponentId )
+        if (!element) return null;
+        return JSON.stringify(element);
+      }
+
     },
   };
 
+  server.register(GQL, { schema, resolvers })
 
-
-fastify.register(GQL, { schema, resolvers })
-
+  server.get('/readContract', async function (req, reply) {
+    const id = req.query.id;
+    const query = `{ readContract(contractId:${id}) }`
+    return reply.graphql(query)
+  })
+  server.get('/readContractComponent', async function (req, reply) {
+    const id = req.query.id;
+    const query = `{ readContractComponent(contractComponentId:${id}) }`
+    return reply.graphql(query)
+  })
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {

@@ -69,7 +69,7 @@ module.exports = `
   }
 
   type Query {
-  readContract(contractId: Int!):  Contract
-  readContractComponent(contractComponentId: Int!):  ContractComponent
+  readContract(contractId: Int):  String
+  readContractComponent(contractComponentId: Int):  String
   }
 `;
